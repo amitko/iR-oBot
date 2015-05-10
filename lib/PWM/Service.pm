@@ -70,8 +70,6 @@ sub valueForID {
     my $line;
 	my $h = tie $line, 'IPC::Shareable', $id, { %{$self->tie_options} } or die "tie failed\n";
 
-print "CHANGE VALUE FOR ID $id from ".$line->{'VALUE'}." TO (".$value.")\n";
-
 	$line->{'VALUE'} = $value;
 
 }
@@ -95,7 +93,6 @@ sub run_line {
 
 	while (1) {
         exit unless $line and exists $line->{'ID'};
-print "RUNNING [".$line->{'ID'}."] VALUE (".$line->{'VALUE'}.") \n\n";
 		$line->duty_cycle();
 	}
 }
