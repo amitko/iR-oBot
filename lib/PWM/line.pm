@@ -12,9 +12,9 @@ sub new {
 	my %Params = @_;
 
 	# ID
-	# PERIOD in milliseconds
-	# DUTY_MIN in milliseconds
-	# DUTY_MAX in milliseconds
+	# PERIOD in microseconds
+	# DUTY_MIN in microseconds
+	# DUTY_MAX in microseconds
 	# VALUE 1..1000 of the duty cycle
 	# PIN ref to GPIO pin number
 	# DEV ref to Device::BCM2835;
@@ -23,24 +23,40 @@ sub new {
 
     return undef unless $Params{'ID'} =~ /^\d+$/;
     return undef unless $Params{'PIN'};
-    
-    $Params{'PERIOD'} = 20 unless $Params{'PERIOD'};
-    $Params{'DUTY_MIN'} = 1 unless $Params{'DUTY_MIN'};
-    $Params{'DUTY_MAX'} = 2 unless $Params{'DUTY_MAX'};
+
+    my $period;
+    my $duty_min;
+    my $duty_max;
+
+    if ( uc $Params{'TYPE'} eq 'SERVO') {
+        $period   = $Params{'PERIOD'}   || 20000;
+        $duty_min = $Params{'DUTY_MIN'} || 1000;
+        $duty_max = $Params{'DUTY_MAX'} || 2000;
+    }
+    elsif (uc $Params{'TYPE'} eq 'MOTOR') {
+        $period   = $Params{'PERIOD'}   || 200;
+        $duty_min = $Params{'DUTY_MIN'} || 0;
+        $duty_max = $Params{'DUTY_MAX'} || 200;
+    }
+    else {
+        $period   = $Params{'PERIOD'}   || 100;
+        $duty_min = $Params{'DUTY_MIN'} || 0;
+        $duty_max = $Params{'DUTY_MAX'} || 50;
+    }
 
     my $id = $Params{'ID'};
 
 	my $dev = new  RasPI::dev;
-	
+
     my $self = {
                 'ID'        => $id,
                 'DEV'       => $dev,
                 'GPIO'      => $dev->gpio($Params{'PIN'}),
                 'VALUE'     => 0,
-                'PERIOD'    => $Params{'PERIOD'},
-                'DUTY_MIN'  => $Params{'DUTY_MIN'},
-                'DUTY_MAX'  => $Params{'DUTY_MAX'},
-                'DUTY_SPAN' => ($Params{'DUTY_MAX'} - $Params{'DUTY_MIN'})*1000,
+                'PERIOD'    => $period,
+                'DUTY_MIN'  => $duty_min,
+                'DUTY_MAX'  => $duty_max,
+                'DUTY_SPAN' => ($duty_max - $duty_min),
                 };
 
     bless $self, $class;
@@ -50,9 +66,9 @@ sub new {
 
 sub duty_cycle {
     my $self = shift;
-    
-    my $hi = $self->{'DUTY_MIN'}*1000 - $self->{'DUTY_SPAN'}*$self->{'VALUE'}/1000; #in microseconds
-    my $lo = $self->{'PERIOD'}*1000 - $hi; 
+
+    my $hi = $self->{'DUTY_MIN'} + $self->{'DUTY_SPAN'}*$self->{'VALUE'}/1000; #in microseconds
+    my $lo = $self->{'PERIOD'} - $hi;
 
     $self->{'GPIO'}->up($hi,'MICRO' => 1);
 	$self->{'GPIO'}->dn($lo,'MICRO' => 1);
