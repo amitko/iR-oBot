@@ -12,9 +12,9 @@ sub new {
 	my %opt = @_;
 	
 	my $self = {
-				'LINE'     => $opt{'LINE'},    # PWM::line
-				'REVERSE'  => $opt{'REVERSE'}, # RasPI::gpio
-				'POWER'    => 0,
+				'LINE_FORWARD'  => $opt{'LINE_FORWARD'},    # PWM::line
+				'LINE_REVERSE'  => $opt{'LINE_REVERSE'},    # PWM::line
+				'POWER'         => 0,
 				};
 	
 	bless $self, $class;
@@ -30,16 +30,18 @@ sub power {
 	return $self->{'POWER'} unless exists $power;		
 		
 	if ( $power < 0 ) {
-		$self->{'REVERSE'}->up();
+		$self->{'LINE_REVERSE'}->value(0);
+		$self->{'LINE_FORWARD'}->value(0);
+		$self->{'LINE_REVERSE'}->value($power);
 	}
 	else {
-		$self->{'REVERSE'}->dn();
+		$self->{'LINE_REVERSE'}->value(0);
+		$self->{'LINE_FORWARD'}->value(0);
+		$self->{'LINE_FORWARD'}->value($power);
 	}
 
 	$self->{'POWER'} = $power unless $opt{'CORRECTION'};
-	$power = abs ($power);
 	
-	$self->{'LINE'}->value($power);
 }
 
 1;

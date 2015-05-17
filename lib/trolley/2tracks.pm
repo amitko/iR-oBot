@@ -21,41 +21,51 @@ sub new {
 	# PIN_REVERSE_LEFT
 	# PIN_REVERSE_RIGHT
 
-	my $left_line = new PWM::line (
+	my $left_line_forward = new PWM::line (
 								'ID'       => 1,
-								'PIN'      => $opt{'LEFT_PIN'},
+								'PIN'      => $opt{'LEFT_PIN_F'},
 								'PERIOD'   => 100,
 								'DUTY_MIN' => 0,
 								'DUTY_MAX' => 100,
 								);
 
-	my $right_line = new PWM::line (
+	my $left_line_revese = new PWM::line (
 								'ID'       => 2,
-								'PIN'      => $opt{'RIGHT_PIN'},
+								'PIN'      => $opt{'LEFT_PIN_R'},
 								'PERIOD'   => 100,
 								'DUTY_MIN' => 0,
 								'DUTY_MAX' => 100,
 								);
-	
 
-	my $s = new PWM::Service ('WITH_LINES' => [$left_line, $right_line])
-	
-
-	my $d = new  RasPI::dev;
-	my $left_r = $d->gpio($opt{'PIN_REVERSE_LEFT'});
-	my $right_r = $d->gpio($opt{'PIN_REVERSE_RIGHT'});
-
-	
-	my $left = new trolley::track (
-								'LINE' => $left_line,
-								'LINE_ID' => 1,
-								'REVERSE' => $left_r,
+	my $right_line_forward = new PWM::line (
+								'ID'       => 3,
+								'PIN'      => $opt{'RIGHT_PIN_F'},
+								'PERIOD'   => 100,
+								'DUTY_MIN' => 0,
+								'DUTY_MAX' => 100,
+								);
+	my $right_line_revers = new PWM::line (
+								'ID'       => 4,
+								'PIN'      => $opt{'RIGHT_PIN_R'},
+								'PERIOD'   => 100,
+								'DUTY_MIN' => 0,
+								'DUTY_MAX' => 100,
 								);
 
+	
+
+	my $s = new PWM::Service ('WITH_LINES' => [$left_line_forward, $left_line_referse, $right_line_forward, $right_line_reverse])
+	
+
+	
 	my $left = new trolley::track (
-								'SERVICE' => $right_line,
-								'LINE_ID' => 2,
-								'REVERSE' => $right_r,
+								'LINE_FORWARD' => $left_line_forward,
+								'LINE_REVERSE' => $left_line_reverse,
+								);
+
+	my $right = new trolley::track (
+								'LINE_FORWARD' => $right_line_forward,
+								'LINE_REVERSE' => $right_line_reverse,
 								);
 
 	
@@ -64,8 +74,6 @@ sub new {
 				'DEVICE'  => $d,
 				'LEFT'    => $left,
 				'RIGHT'   => $right,
-				'LEFT_R'  =>  $left_r,
-				'RIGHT_R' =>  $right_r,
 				}
 				
 				
@@ -79,8 +87,8 @@ sub forward {
 	my $self = shift;
 	my $power = shift || 0;
 	
-	$self->{'LEFT'}->forward( $power );
-	$self->{'RIGHT'}->forward( $power );
+	$self->{'LEFT'}->power( $power );
+	$self->{'RIGHT'}->power( $power );
 	
 }
 
