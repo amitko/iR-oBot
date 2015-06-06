@@ -46,7 +46,7 @@ sub new {
 
     my $id = $Params{'ID'};
 
-	my $dev = new  RasPI::dev;
+	my $dev = new RasPI::dev;
 
     my $self = {
                 'ID'        => $id,
