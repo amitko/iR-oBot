@@ -10,6 +10,8 @@ import UIKit
 
 class ViewController: UIViewController {
 
+    let MAX_SPEED: Float = 255
+    
     @IBOutlet weak var cameraView: UIView!
     
     override func viewDidLoad() {
@@ -26,10 +28,8 @@ class ViewController: UIViewController {
     
     @IBAction func throttleChanged(_ sender: UISlider) {
         print("Throttle Value: \t\(sender.value)")
-    }
-    
-    @IBAction func armPositionChanged(_ sender: UISlider) {
-        print("Arm Position Value: \t\(sender.value)")
+        let speed = Int(MAX_SPEED * sender.value)
+        ControlManager.executeCommand(.LEFT_TURN, speed: speed)
     }
     
     @IBAction func rotationChanged(_ sender: UISlider) {
